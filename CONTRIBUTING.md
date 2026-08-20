@@ -6,7 +6,7 @@ Thank you for your interest in contributing! 🎉
 
 ### 1. Fork the Repository
 ```bash
-git clone https://github.com/Qyroxen/Infrastructure-As-Code.git
+git clone https://github.com/AetherCodeHQ/Infrastructure-As-Code.git
 cd Infrastructure-As-Code
 ```
 
