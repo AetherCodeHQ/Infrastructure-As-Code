@@ -1,29 +1,41 @@
-
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
 func main() {
-	dir := "."
-	if len(os.Args) > 1 {
-		dir = os.Args[1]
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: iac-validator <config-file>")
+		return
 	}
-	var n int
-	filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
-			return nil
+	f, err := os.Open(os.Args[1])
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	defer f.Close()
+	resources := 0
+	issues := 0
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.Contains(line, "resource") || strings.Contains(line, "Resource") {
+			resources++
 		}
-		if strings.HasPrefix(info.Name(), ".") {
-			return nil
+		if strings.Contains(line, "password") && !strings.Contains(line, "var.") {
+			issues++
+			fmt.Printf("  [WARN] Hardcoded credential at: %s\n", line)
 		}
-		n++
-		fmt.Println(p)
-		return nil
-	})
-	fmt.Printf("%d file(s)\n", n)
+		if strings.Contains(line, "0.0.0.0/0") {
+			issues++
+			fmt.Printf("  [WARN] Open CIDR (0.0.0.0/0) detected\n")
+		}
+	}
+	fmt.Printf("\nIaC Validator\n")
+	fmt.Printf("Resources: %d\n", resources)
+	fmt.Printf("Issues:    %d\n", issues)
 }
