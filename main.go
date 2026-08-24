@@ -1,26 +1,29 @@
+
 package main
 
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
-// infrastructure_as_code - Declarative infrastructure config
-func infrastructure_as_code(path string) {
-	fmt.Println("========================================")
-	fmt.Println("  Infrastructure-As-Code")
-	fmt.Println("  Declarative infrastructure config")
-	fmt.Println("========================================")
-	fmt.Println()
-	fmt.Println("Target:", path)
-	fmt.Println("Processing...")
-	fmt.Println("Done!")
-}
-
 func main() {
-	path := "."
+	dir := "."
 	if len(os.Args) > 1 {
-		path = os.Args[1]
+		dir = os.Args[1]
 	}
-	infrastructure_as_code(path)
+	var n int
+	filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+		n++
+		fmt.Println(p)
+		return nil
+	})
+	fmt.Printf("%d file(s)\n", n)
 }
